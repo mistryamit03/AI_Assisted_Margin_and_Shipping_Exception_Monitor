@@ -355,44 +355,8 @@ But it is not yet a full AI agent because:
 
 That honest wording is stronger than overclaiming.
 
----
-
-## 14) Suggested GitHub Folder Structure
-A clean structure for publishing the project:
-
-```text
-AI-Assisted-Margin-Shipping-Exception-Monitor/
-│
-├── data/
-├── sql/
-│   ├── 01_join_base_tables.sql
-│   ├── 02_add_business_calculations.sql
-│   ├── 03_add_exception_flags.sql
-│   ├── 04_create_exceptions_output.sql
-│   ├── 05_create_view1_vw_order_health.sql
-│   ├── 06_create_view2_vw_exceptions.sql
-│   ├── 07_create_exception_memory.sql
-│   └── 08_create_vw_exception_agent_input.sql
-├── workflows/
-│   ├── phase1_automation.json
-│   ├── phase2_ai_summary.json
-│   └── phase3_memory_routing.json
-├── screenshots/
-│   ├── dashboard_mvp.png
-│   ├── n8n_workflow_full.png
-│   ├── agent_prep_output.png
-│   ├── merge_output.png
-│   ├── gmail_alert_output.png
-│   └── bigquery_memory_validation.png
-├── docs/
-│   ├── phase1_notes.md
-│   ├── phase2_notes.md
-│   └── phase3_notes.md
-├── README.md
-└── Project Outline.md
-```
 
 ---
 
-## 15) Final One-Line Summary
-A portfolio-ready AI-assisted exception monitoring workflow that detects margin and shipping risks in BigQuery, summarizes them with a local LLM, routes alerts through n8n, and uses memory to distinguish new vs known exceptions for faster operational action.
+## 14) Final One-Line Summary
+A portfolio-ready AI-assisted exception monitoring workflow that detects margin and shipping risks in BigQuery, summarises them with a local LLM, routes alerts through n8n, and uses memory to distinguish new vs known exceptions for faster operational action.
