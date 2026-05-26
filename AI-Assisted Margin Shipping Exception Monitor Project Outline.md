@@ -26,7 +26,7 @@ In many businesses, operational order and shipment data are spread across CSV fi
 2. **Shipping delays are reviewed manually and reactively**
 3. **Stakeholders do not receive a fast, structured explanation of what matters most and what to do next**
 
-This project solves that by using SQL logic to detect risky exceptions, surfacing them in a dashboard, summarizing them with an LLM, and routing the result into different actions.
+This project solves that by using SQL logic to detect risky exceptions, surfacing them in a dashboard, summarising them with an LLM, and routing the result into different actions.
 
 ---
 
@@ -97,7 +97,7 @@ n8n is used for:
 ### AI layer: Ollama
 Ollama is used locally with:
 - model: **`llama3.2:1b`**
-- role: summarize exception patterns in plain English for stakeholder-friendly interpretation
+- role: summarise exception patterns in plain English for stakeholder-friendly interpretation
 
 ---
 
@@ -224,9 +224,9 @@ The LLM receives:
 - a required action label
 
 It then generates a short stakeholder summary that explains:
-- how many rows were reviewed
-- how many are new vs known
-- what patterns are visible
+- How many rows were reviewed
+- How many are new vs known
+- What patterns are visible
 - whether the workflow recommends **ALERT** or **MONITOR**
 
 ### Important learning from implementation
@@ -260,10 +260,10 @@ Implemented MVP:
 - `exception_memory` table
 - `vw_exception_agent_input` comparison view
 - `exception_signature` generation
-- `new` vs `known` labeling
+- `new` vs `known` labelling
 - `Agent Prep` count logic
 - `ALERT` vs `MONITOR` routing
-- writing current run back into memory
+- writing the current run back into memory
 
 ### Honest Phase 3 status
 Phase 3 is **implemented as an MVP**, but it is still rule-driven.
@@ -338,25 +338,5 @@ Email is enough for proof, but future versions could also send results to:
 
 ---
 
-## 13) Final Honest Positioning
-This project should be described honestly as:
-
-> **AI-assisted exception monitoring workflow with memory and routing**
-
-It is stronger than:
-- a dashboard-only project
-- a plain SQL exception report
-- a simple LLM summary demo
-
-But it is not yet a full AI agent because:
-- actions are still hardcoded
-- memory behaves more like history than live state
-- dynamic planning and tool use are not implemented
-
-That honest wording is stronger than overclaiming.
-
-
----
-
-## 14) Final One-Line Summary
+## 13) Final One-Line Summary
 A portfolio-ready AI-assisted exception monitoring workflow that detects margin and shipping risks in BigQuery, summarises them with a local LLM, routes alerts through n8n, and uses memory to distinguish new vs known exceptions for faster operational action.
