@@ -87,6 +87,45 @@ If a field depends on another calculated field, an extra CTE / outer query impro
 Adding small helper fields like priority_sort_order and order_month makes the reporting layer much cleaner and easier to control
 Business understanding gained
 
+
+
+
+*Reasoning why it is not yet a complete AI agent, but an AI-assisted automation workflow*
+
+
+On the AI agent question, my honest answer is:
+
+Right now, this is not yet a full AI agent.
+It is an AI-assisted automation workflow.
+
+Why is that:
+
+it has a Brain component once we add the LLM summary
+it has Tools, because it uses BigQuery and n8n workflow actions
+but it does not yet really have Memory in the stronger agent sense
+and it does not yet have much autonomous reasoning or multi-step decision-making
+
+So if you presented it today, I would call it:
+
+an AI-assisted exception monitoring workflow
+
+That is still good and still relevant.
+
+If you want it to feel much closer to an AI agent, then later we should add:
+
+memory of previous runs
+logic to compare “new exceptions vs already known exceptions”
+reasoning about what to prioritise
+possibly different actions based on what the LLM concludes
+
+Then it becomes more agent-like.
+
+So the honest positioning is:
+
+Phase 1 = automation workflow
+Phase 2 = AI-assisted workflow
+Phase 3 later, if needed = more agent-like system with memory and reasoning
+
 This step showed me that a strong analytics project is not just about calculations and flags. It also needs a reporting layer that is easy for business users to read, sort, and interpret correctly.
 
 This step showed me how analytics projects become more valuable when the logic is turned into reusable data products instead of remaining as ad hoc queries.
