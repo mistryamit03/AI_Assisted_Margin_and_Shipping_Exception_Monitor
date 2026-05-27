@@ -1,6 +1,13 @@
 # AI-Assisted Margin and Shipping Exception Monitor (Updated MVP Outline)
 
+**Dashboard Preview (Screenshot):** [Looker Studio Dashboard MVP](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor/blob/main/Screenshots/Looker%20dashboard_mvp.png)  
+**Workflow Export:** [phase3_memory_routing.json](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor/blob/main/workflows/phase3_memory_routing.json)  
+**Repo:** [AI_Assisted_Margin_and_Shipping_Exception_Monitor](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor)
+
+---
+
 ## 1) Project Summary
+
 This project is an end-to-end analytics and workflow automation MVP that monitors **margin risk** and **shipping exceptions** from order and shipment data.
 
 It combines:
@@ -8,20 +15,22 @@ It combines:
 - **Looker Studio** for dashboard visibility
 - **n8n** for workflow orchestration and action routing
 - **Ollama** with a local model (`llama3.2:1b`) for AI-generated business summaries
-- **Gmail** for alert delivery and visual proof of the workflow output
+- **Gmail** for alert delivery and visual proof of workflow output
 
 The project started as a lightweight exception-monitoring automation and evolved into an **AI-assisted exception workflow with memory and routing**.
 
-Important honest positioning:
+### Honest positioning
 - This is **more advanced than a simple dashboard or alert pipeline**
-- It is **closer to agent-like behavior** because it now compares current exceptions against memory and routes actions accordingly
+- It is **closer to agent-like behavior** because it compares current exceptions against memory and routes actions accordingly
 - It is **not yet a full AI agent** because actions are still rule-based, memory behaves more like run history than full stateful memory, and dynamic planning/tool use is not implemented
 
 ---
 
 ## 2) Business Problem
-In many businesses, operational order and shipment data are spread across CSV files, spreadsheets, and disconnected systems. This creates three common problems:
 
+In many businesses, operational order and shipment data are spread across CSV files, spreadsheets, and disconnected systems.
+
+This creates three common problems:
 1. **Low-margin or loss-making orders are detected too late**
 2. **Shipping delays are reviewed manually and reactively**
 3. **Stakeholders do not receive a fast, structured explanation of what matters most and what to do next**
@@ -31,6 +40,7 @@ This project solves that by using SQL logic to detect risky exceptions, surfacin
 ---
 
 ## 3) Updated MVP Goal
+
 Build a practical end-to-end workflow that:
 - uses structured order, cost, and shipment data already loaded into **BigQuery**
 - calculates margin and delay metrics in SQL
@@ -42,12 +52,13 @@ Build a practical end-to-end workflow that:
 - stores exception history in a memory table to distinguish **new** vs **known** exceptions
 - routes the workflow into **ALERT** vs **MONITOR** depending on the detected state
 
-This is not a production deployment. It is a portfolio-ready MVP that proves analytics engineering, automation, and AI-assisted decision support.
+This is not a production deployment. It is a **portfolio-ready MVP** that proves analytics engineering, automation, and AI-assisted decision support.
 
 ---
 
 ## 4) What Was Actually Implemented
-The initial outline described a broader concept. The executed MVP is more specific and more honest:
+
+The initial outline described a broader concept. The executed MVP is more specific and more honest.
 
 ### Implemented
 - mock order, cost, and shipment datasets loaded into **BigQuery**
@@ -123,37 +134,35 @@ The monitor uses the following rules:
 - **critical_delay_flag**: `delay_days >= 3`
 
 ### Priority logic
-High-priority rows are determined when the row is severe enough to require faster attention.
-In the current workflow, the selected review set focuses on rows where:
+High-priority rows are determined when the row is severe enough to require faster attention. In the current workflow, the selected review set focuses on rows where:
 - `priority_level = 'High'`
 
 ### BigQuery views created
+
 #### `vw_order_health`
-This view represents the broader calculated order health output.
-It contains:
+This view represents the broader calculated order health output. It contains:
 - joined order, cost, and shipment data
 - margin and delay calculations
 - exception flags
 
 #### `vw_exceptions`
-This view contains only the rows that match exception criteria.
-It is the base exception layer for the dashboard and workflow.
+This view contains only the rows that match exception criteria. It is the base exception layer for the dashboard and workflow.
 
 #### `vw_exception_agent_input`
-This Phase 3 view compares current exceptions against memory.
-It adds:
+This Phase 3 view compares current exceptions against memory. It adds:
 - `exception_signature`
 - `is_new_exception`
 - `status` (`new` or `known`)
 
 ### Memory table created
+
 #### `exception_memory`
-This table stores exception records from each workflow run.
-It currently acts as a **run history / memory log**, not a deduplicated state table.
+This table stores exception records from each workflow run. It currently acts as a **run history / memory log**, not a deduplicated state table.
 
 ---
 
 ## 7) Dashboard MVP Implemented
+
 The Looker Studio dashboard was built on top of the exception views.
 
 ### Implemented KPI cards
@@ -213,8 +222,8 @@ The Looker Studio dashboard was built on top of the exception views.
 ---
 
 ## 9) How AI Is Used in the Final MVP
-The AI does **not** detect exceptions directly.
-Detection is still based on SQL because SQL is deterministic, explainable, and easier to validate.
+
+The AI does **not** detect exceptions directly. Detection is still based on SQL because SQL is deterministic, explainable, and easier to validate.
 
 ### What the LLM does
 The LLM receives:
@@ -224,13 +233,15 @@ The LLM receives:
 - a required action label
 
 It then generates a short stakeholder summary that explains:
-- How many rows were reviewed
-- How many are new vs known
-- What patterns are visible
+- how many rows were reviewed
+- how many are new vs known
+- what patterns are visible
 - whether the workflow recommends **ALERT** or **MONITOR**
 
 ### Important learning from implementation
-At first, the model was asked to infer too much directly from raw JSON, which caused inconsistent counts and unstable summaries. This was improved by:
+At first, the model was asked to infer too much directly from raw JSON, which caused inconsistent counts and unstable summaries.
+
+This was improved by:
 - computing exact counts in **Agent Prep**
 - passing those counts into the prompt
 - using the model mainly for explanation, not for counting
@@ -266,56 +277,46 @@ Implemented MVP:
 - writing the current run back into memory
 
 ### Honest Phase 3 status
-Phase 3 is **implemented as an MVP**, but it is still rule-driven.
-It proves memory and routing, but it is not yet a fully autonomous agent.
+Phase 3 is **implemented as an MVP**, but it is still rule-driven. It proves memory and routing, but it is not yet a fully autonomous agent.
 
 ---
 
 ## 11) Key Findings from the Build
-Based on the executed workflow, dashboard screenshots, and email outputs, these are the main findings:
 
 ### Finding 1: SQL should remain the source of truth
-The LLM produced varying row counts and unstable summaries when asked to infer directly from raw JSON.
-The fix was to let SQL and n8n compute the exact counts and let the LLM only explain them.
+The LLM produced varying row counts and unstable summaries when asked to infer directly from raw JSON. The fix was to let SQL and n8n compute the exact counts and let the LLM only explain them.
 
 ### Finding 2: Aggregation is essential before the AI step
-Before adding the **Aggregate** node, the LLM ran multiple times because it was receiving row-by-row items.
-After aggregation, the workflow generated one summary for the whole exception set.
+Before adding the **Aggregate** node, the LLM ran multiple times because it was receiving row-by-row items. After aggregation, the workflow generated one summary for the whole exception set.
 
 ### Finding 3: Summary-only alerts were too weak
-A plain text blurb was not enough for trust.
-Adding the exception table to the Gmail body made the output much stronger and more credible.
+A plain text blurb was not enough for trust. Adding the exception table to the Gmail body made the output much stronger and more credible.
 
 ### Finding 4: Memory works, but the current design behaves like history
-The `exception_memory` table currently stores a run-by-run history.
-This is enough for MVP comparison, but repeated executions create duplicate rows with different `status` values.
-That is acceptable for the current prototype, but not ideal for a cleaner stateful memory design.
+The `exception_memory` table currently stores a run-by-run history. This is enough for MVP comparison, but repeated executions create duplicate rows with different `status` values. That is acceptable for the current prototype, but not ideal for a cleaner stateful memory design.
 
 ### Finding 5: Routing makes the workflow more agent-like
 Adding:
 - `new_exception_count`
 - `known_exception_count`
 - `agent_action`
-- and **ALERT vs MONITOR** routing
-moved the project beyond a simple alert pipeline.
+- and **ALERT vs MONITOR** routing moved the project beyond a simple alert pipeline.
 
 ---
 
 ## 12) Recommendations for Improvement
-The current MVP is strong, but these are the next best improvements:
 
 ### Recommendation 1: Improve summary quality further
-The AI output is functional, but still somewhat raw and list-like.
-A stronger next step would be:
+The AI output is functional, but still somewhat raw and list-like. A stronger next step would be:
 - tighter prompt wording
 - more deterministic phrasing
 - cleaner executive summaries
 
 ### Recommendation 2: Split memory into history vs state
-Right now `exception_memory` behaves like a history log.
-A more mature design would separate:
+Right now `exception_memory` behaves like a history log. A more mature design would separate:
 - `exception_history`
 - `exception_state`
+
 so the workflow can reason more cleanly about recurring vs active exceptions.
 
 ### Recommendation 3: Add stronger state transitions
@@ -326,8 +327,7 @@ Instead of only `new` vs `known`, future versions could track:
 - improved
 
 ### Recommendation 4: Add scheduling
-The current workflow uses a manual trigger for demo clarity.
-A next step would be a daily scheduled trigger.
+The current workflow uses a manual trigger for demo clarity. A next step would be a daily scheduled trigger.
 
 ### Recommendation 5: Add a second output channel
 Email is enough for proof, but future versions could also send results to:
@@ -339,4 +339,5 @@ Email is enough for proof, but future versions could also send results to:
 ---
 
 ## 13) Final One-Line Summary
+
 A portfolio-ready AI-assisted exception monitoring workflow that detects margin and shipping risks in BigQuery, summarises them with a local LLM, routes alerts through n8n, and uses memory to distinguish new vs known exceptions for faster operational action.
