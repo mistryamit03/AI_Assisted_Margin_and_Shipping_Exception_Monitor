@@ -1,8 +1,8 @@
 # AI-Assisted Margin and Shipping Exception Monitor (Updated MVP Outline)
 
-**Dashboard Preview (Screenshot):** [Looker Studio Dashboard MVP](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor/blob/main/Screenshots/Looker%20dashboard_mvp.png)  
+**Dashboard Preview (Screenshot):** [Looker Studio Dashboard](https://datastudio.google.com/u/0/reporting/e5c3c570-ec96-4b92-84d9-079da9944e3f/page/lZquF)  
 **Workflow Export:** [phase3_memory_routing.json](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor/blob/main/workflows/phase3_memory_routing.json)  
-**Repo:** [AI_Assisted_Margin_and_Shipping_Exception_Monitor](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor)
+**Workflow Diagram:** [AI_Assisted_Margin_and_Shipping_Exception_Monitor Workflow Diagram](https://github.com/mistryamit03/AI_Assisted_Margin_and_Shipping_Exception_Monitor/blob/main/Screenshots/n8n_workflow_full.png)
 
 ---
 
