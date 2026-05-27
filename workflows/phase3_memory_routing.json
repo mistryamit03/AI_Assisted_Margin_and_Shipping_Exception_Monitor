@@ -1,0 +1,562 @@
+{
+  "name": "Manual Exception Check",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2704,
+        -608
+      ],
+      "id": "f1cfb07c-352c-4afb-b7d8-dff04fc203bd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "projectId": {
+          "__rl": true,
+          "value": "ferrous-biplane-450410-i2",
+          "mode": "list",
+          "cachedResultName": "My Project 15978",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=ferrous-biplane-450410-i2"
+        },
+        "sqlQuery": "SELECT COUNT(*) AS high_priority_exceptions\nFROM `ferrous-biplane-450410-i2.AI_Mockproject.vw_exceptions`\nWHERE priority_level = 'High'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        -2544,
+        -288
+      ],
+      "id": "3975d67e-3473-476c-b44c-cea3917f3700",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "googleBigQueryOAuth2Api": {
+          "id": "scbT3oG8U029hO1O",
+          "name": "Google BigQuery account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f95dcc5d-63de-4c8e-ad41-08dec26b43da",
+              "leftValue": "={{ $json.high_priority_exceptions }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2352,
+        -528
+      ],
+      "id": "e4704947-2794-4237-8c7e-0a6115eaa2bd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "projectId": {
+          "__rl": true,
+          "value": "ferrous-biplane-450410-i2",
+          "mode": "list",
+          "cachedResultName": "My Project 15978",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=ferrous-biplane-450410-i2"
+        },
+        "sqlQuery": "SELECT\n  order_id,\n  order_date,\n  country,\n  product_type,\n  selling_price,\n  total_cost,\n  margin_value,\n  margin_pct,\n  delay_days,\n  priority_level,\n  exception_signature,\n  is_new_exception,\n  status\nFROM `ferrous-biplane-450410-i2.AI_Mockproject.vw_exception_agent_input`\nWHERE priority_level = 'High'\nORDER BY is_new_exception DESC, delay_days DESC, margin_value ASC\nLIMIT 10",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        -2128,
+        -688
+      ],
+      "id": "524cc72f-fa96-4379-9bbd-3686b7808052",
+      "name": "Execute a SQL query1",
+      "credentials": {
+        "googleBigQueryOAuth2Api": {
+          "id": "scbT3oG8U029hO1O",
+          "name": "Google BigQuery account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d917ad07-b10c-4520-aa1c-9cc77f64b1ff",
+              "name": "alert_type",
+              "value": "High Priority Exception",
+              "type": "string"
+            },
+            {
+              "id": "c879acfe-39ee-4add-b798-13e597a64371",
+              "name": "run_mode",
+              "value": "manual",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1952,
+        -384
+      ],
+      "id": "85a587b7-0d8e-48b6-a454-eee59a4f27b5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d3a50dc2-9642-470c-83bb-69971c6aef21",
+              "name": "status",
+              "value": "No High-Priority Exceptions",
+              "type": "string"
+            },
+            {
+              "id": "3aa331d2-83cd-4406-ac88-f5bf7cff0902",
+              "name": "alert_type",
+              "value": "No Action Needed",
+              "type": "string"
+            },
+            {
+              "id": "44cf9e1e-eb71-4e0a-b83f-72db4c91d25e",
+              "name": "run_mode",
+              "value": "manual",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2192,
+        -256
+      ],
+      "id": "9d9475ff-de99-4e09-a0f5-319d3269bd61",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an exception-monitoring agent for operations.\n\nReview the provided high-priority exception rows and write a short business summary for a stakeholder.\n\nFacts:\n- Rows reviewed: {{ $json.total_exception_count }}\n- New exceptions: {{ $json.new_exception_count }}\n- Known exceptions: {{ $json.known_exception_count }}\n- Recommended action: {{ $json.agent_action }}\n\nInstructions:\n- Explain what is new versus already known\n- Mention only patterns directly visible in the data, such as delay_days, margin_value, margin_pct, country, and product_type\n- Do not infer relationships that are not directly shown\n- Do not invent numbers or causes\n- Plain text only\n- No markdown\n- Maximum 4 short lines\n\nData:\n{{ JSON.stringify($json.exceptions) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1344,
+        -368
+      ],
+      "id": "e45d8f4a-3d88-430e-b134-de27334feeb4",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:1b",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1360,
+        -112
+      ],
+      "id": "ef327594-3f3c-432c-a5cf-df0a8a2b6c03",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OBvRul3YK6Un2VTH",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "exceptions",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        -640
+      ],
+      "id": "71d97ab5-f5a6-486d-ad75-a011606c14ae",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1088,
+        -672
+      ],
+      "id": "5405831b-a658-4903-9f03-a68ac6cc2c38",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "projectId": {
+          "__rl": true,
+          "value": "ferrous-biplane-450410-i2",
+          "mode": "list",
+          "cachedResultName": "My Project 15978",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=ferrous-biplane-450410-i2"
+        },
+        "sqlQuery": "INSERT INTO `ferrous-biplane-450410-i2.AI_Mockproject.exception_memory` (\n  run_timestamp,\n  order_id,\n  order_date,\n  country,\n  product_type,\n  priority_level,\n  selling_price,\n  total_cost,\n  margin_value,\n  margin_pct,\n  delay_days,\n  alert_type,\n  run_mode,\n  exception_signature,\n  is_new_exception,\n  status\n)\nSELECT\n  CURRENT_TIMESTAMP() AS run_timestamp,\n  order_id,\n  order_date,\n  country,\n  product_type,\n  priority_level,\n  selling_price,\n  total_cost,\n  margin_value,\n  margin_pct,\n  delay_days,\n  'High Priority Exception' AS alert_type,\n  'manual' AS run_mode,\n  exception_signature,\n  is_new_exception,\n  status\nFROM `ferrous-biplane-450410-i2.AI_Mockproject.vw_exception_agent_input`\nWHERE priority_level = 'High'\nLIMIT 10",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        -448
+      ],
+      "id": "dcfb7a55-12ed-4008-ad02-5cb15abb90b0",
+      "name": "Execute a SQL query2",
+      "credentials": {
+        "googleBigQueryOAuth2Api": {
+          "id": "scbT3oG8U029hO1O",
+          "name": "Google BigQuery account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3cab60a5-fbb1-40ac-93ff-cdcb11f60d28",
+              "name": "total_exception_count",
+              "value": "={{ $json.exceptions.length }}",
+              "type": "string"
+            },
+            {
+              "id": "8695f29e-587a-470f-aee6-dc1bbc1605ae",
+              "name": "new_exception_count",
+              "value": "={{ $json.exceptions.filter(e => String(e.is_new_exception).toLowerCase() === 'true').length }}",
+              "type": "string"
+            },
+            {
+              "id": "142f8240-4c81-4fef-8269-0a92e4cf3e95",
+              "name": "known_exception_count",
+              "value": "={{ $json.exceptions.filter(e => String(e.is_new_exception).toLowerCase() === 'false').length }}",
+              "type": "string"
+            },
+            {
+              "id": "799c52ad-f56f-4bdc-9151-ebcc60e10fc4",
+              "name": "agent_action",
+              "value": "={{ $json.exceptions.some(e => String(e.is_new_exception).toLowerCase() === 'true') ? 'ALERT' : 'MONITOR' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1536,
+        -512
+      ],
+      "id": "75331047-c43a-41eb-a87c-e7b3966ee4db",
+      "name": "Agent Prep"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f74ab160-155d-464a-972f-e926cbefbeea",
+              "leftValue": "={{ $json.agent_action }}",
+              "rightValue": "ALERT",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -928,
+        -400
+      ],
+      "id": "f9d1dd5a-5cee-4447-bd11-4569da4f7552",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "sendTo": "mistryamit03@gmail.com",
+        "subject": "={{ `ALERT - ${$json.new_exception_count} New High-Priority Exceptions` }}",
+        "message": "={{\n`<div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #222;\">\n  <h2 style=\"margin-bottom: 12px; color: #b00020;\">AI Exception Summary - ALERT</h2>\n\n  <p><strong>Total rows reviewed:</strong> ${$json.total_exception_count}</p>\n  <p><strong>New exceptions:</strong> ${$json.new_exception_count}</p>\n  <p><strong>Known exceptions:</strong> ${$json.known_exception_count}</p>\n  <p><strong>Recommended action:</strong> ${$json.agent_action}</p>\n\n  <h3 style=\"margin-top: 24px; margin-bottom: 8px;\">AI Summary</h3>\n  <p style=\"line-height: 1.6;\">${String($json.text).replace(/\\\\n/g, '<br>')}</p>\n\n  <h3 style=\"margin-top: 24px; margin-bottom: 8px;\">Exception Details</h3>\n  <table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;\">\n    <thead style=\"background-color: #f2f2f2;\">\n      <tr>\n        <th>Order ID</th>\n        <th>Order Date</th>\n        <th>Country</th>\n        <th>Product Type</th>\n        <th>Selling Price</th>\n        <th>Total Cost</th>\n        <th>Margin Value</th>\n        <th>Margin %</th>\n        <th>Delay Days</th>\n        <th>Priority</th>\n        <th>Status</th>\n        <th>Is New</th>\n      </tr>\n    </thead>\n    <tbody>\n      ${$json.exceptions.map(e => `\n        <tr>\n          <td>${e.order_id}</td>\n          <td>${e.order_date}</td>\n          <td>${e.country}</td>\n          <td>${e.product_type}</td>\n          <td>${e.selling_price}</td>\n          <td>${e.total_cost}</td>\n          <td>${e.margin_value}</td>\n          <td>${e.margin_pct}</td>\n          <td>${e.delay_days}</td>\n          <td>${e.priority_level}</td>\n          <td>${e.status}</td>\n          <td>${e.is_new_exception}</td>\n        </tr>\n      `).join('')}\n    </tbody>\n  </table>\n</div>`\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -768,
+        -608
+      ],
+      "id": "40d372e4-3cc0-4e75-8b5c-bbdf836549c4",
+      "name": "Gmail Alert",
+      "webhookId": "59a70766-e8be-4340-bf5a-b80a9093d21c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Il3AuZL4GzdpOue8",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mistryamit03@gmail.com",
+        "subject": "={{ `MONITOR - ${$json.known_exception_count} Known High-Priority Exceptions` }}",
+        "message": "={{\n`<div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #222;\">\n  <h2 style=\"margin-bottom: 12px; color: #1a73e8;\">AI Exception Summary - MONITOR</h2>\n\n  <p><strong>Total rows reviewed:</strong> ${$json.total_exception_count}</p>\n  <p><strong>New exceptions:</strong> ${$json.new_exception_count}</p>\n  <p><strong>Known exceptions:</strong> ${$json.known_exception_count}</p>\n  <p><strong>Recommended action:</strong> ${$json.agent_action}</p>\n\n  <h3 style=\"margin-top: 24px; margin-bottom: 8px;\">AI Summary</h3>\n  <p style=\"line-height: 1.6;\">${String($json.text).replace(/\\\\n/g, '<br>')}</p>\n\n  <h3 style=\"margin-top: 24px; margin-bottom: 8px;\">Exception Details</h3>\n  <table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;\">\n    <thead style=\"background-color: #f2f2f2;\">\n      <tr>\n        <th>Order ID</th>\n        <th>Order Date</th>\n        <th>Country</th>\n        <th>Product Type</th>\n        <th>Selling Price</th>\n        <th>Total Cost</th>\n        <th>Margin Value</th>\n        <th>Margin %</th>\n        <th>Delay Days</th>\n        <th>Priority</th>\n        <th>Status</th>\n        <th>Is New</th>\n      </tr>\n    </thead>\n    <tbody>\n      ${$json.exceptions.map(e => `\n        <tr>\n          <td>${e.order_id}</td>\n          <td>${e.order_date}</td>\n          <td>${e.country}</td>\n          <td>${e.product_type}</td>\n          <td>${e.selling_price}</td>\n          <td>${e.total_cost}</td>\n          <td>${e.margin_value}</td>\n          <td>${e.margin_pct}</td>\n          <td>${e.delay_days}</td>\n          <td>${e.priority_level}</td>\n          <td>${e.status}</td>\n          <td>${e.is_new_exception}</td>\n        </tr>\n      `).join('')}\n    </tbody>\n  </table>\n</div>`\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        -304
+      ],
+      "id": "c5b9d8ea-3e7f-4c80-a835-b4b50e0d1a0e",
+      "name": "Gmail Monitor",
+      "webhookId": "58aeda90-9136-4363-8b26-6c1f84a39f8e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Il3AuZL4GzdpOue8",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Agent Prep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Prep": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Gmail Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail Monitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Alert": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Monitor": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8be72905-06db-478e-9b54-99241df4199d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58a80065c9af30664adf0a6db38d275a3ef8557ee640284a91f060ac18e2bda1"
+  },
+  "id": "1fUUMlSBbqffjhZT",
+  "tags": []
+}

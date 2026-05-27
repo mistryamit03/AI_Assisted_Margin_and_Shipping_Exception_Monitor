@@ -1,6 +1,11 @@
 
 -- Creating the vw_exceptions view after figuring out the problems in looker studio
+-- create the comparison view
 
+-- We want BigQuery to answer:
+
+-- is this exception new
+-- or has this same issue pattern been seen before
 
 
 CREATE OR REPLACE VIEW `ferrous-biplane-450410-i2.AI_Mockproject.vw_exceptions`
